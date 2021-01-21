@@ -20,13 +20,13 @@ class Quiz(models.Model):
   comments = models.ManyToManyField(AUTH_USER_MODEL, through="Comment", related_name='my_comments')
   favourites = models.ManyToManyField(AUTH_USER_MODEL, related_name="my_favourites")
   categories = models.ManyToManyField(Category, related_name="quizes")
-  
+
 def question_image_path(instance, filename):
   return 'options/{}/{}'.format(instance.id, filename)
 
 class Question(models.Model):
   text = models.TextField()
-  has_multipe_answers = models.BooleanField(default=False)
+  has_multiple_answers = models.BooleanField(default=False)
   image = models.ImageField(null=True, upload_to = question_image_path)
   quiz = models.ForeignKey(Quiz, null=True, on_delete=models.CASCADE, related_name='questions')
 

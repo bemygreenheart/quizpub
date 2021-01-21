@@ -1,11 +1,12 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from .models import Option, Question, Quiz, Comment, Category
 
 class OptionSerializer(serializers.ModelSerializer):
   class Meta:
     model = Option
-    fields = ['text', 'is_answer']
+    fields = ['id', 'text', 'is_answer']
 
   def create(self, validated_data):
     return Option.objects.create(**validated_data)
@@ -21,7 +22,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Question
-    fields = ['text', 'has_multipe_answers', 'options','image']
+    fields = ['id','text', 'has_multiple_answers', 'options','image']
 
   def create(self, validated_data):
     options_data = validated_data.pop('options')
@@ -30,8 +31,20 @@ class QuestionSerializer(serializers.ModelSerializer):
       Option.objects.create(**option_data, question=question)
     return question
 
+# Each question is updated individually to minimize network traffic
   def update(self, instance, validated_data):
-    pass
+    options_data = validated_data.pop('options')
+    instance = validated_data.get("text", instance.text)
+    instance.has_multiple_answers = validated_data.get('has_multiple_answers', instance.has_multiple_answers)
+    instance.image = validated_data.get('image', instance.image)
+    for option_data in options_data:
+      option = get_object_or_404(Option, pk=option.id)
+      option.text = option_data.get('text', option.text)
+      option.is_answer = option_data.get('is_answer', option.is_answer)
+      option.save()
+
+    instance.save()
+    return instance
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -54,10 +67,25 @@ class QuizSerializer(serializers.ModelSerializer):
   categories = CategorySerializer(many=True)
   class Meta:
     model = Quiz
-    fields = ['title', 'description', 'image', 'created_at', 'is_published', 'publish_date', 'comments']
+    fields = ['id','title', 'description', 'image', 'created_at', 'is_published', 'publish_date', 'comments']
 
+# Quiz is created at once with all the data for questions in it
   def create(self, validated_data):
     questions_data = validated_data.pop('questions')
-    quiz = Quiz.objects.create()
+    quiz = Quiz.objects.create(**validated_data)
     for question_data in questions_data:
-      Question.objects.create(question)
+      options_data = question_data.pop('options')
+      question = Question.objects.create(quiz = quiz, **question_data)
+      for option_data in options_data:
+        Option.objects.create(question = question, **option_data)
+
+    return quiz
+
+# Just updating the quiz only data
+  def update(self, instance, validated_data):
+    instance.title = validated_data.get('title', instance.title)
+    instance.description = validated_data.get('description', instance.description)
+    instance.is_published = validated_data.get('is_published', instance.is_published)
+    instance.publish_date = validated_data.get('publish_date', instance.publish_date)
+    instance.image = validated_data.get('image', instance.image)
+    return instance
