@@ -6,9 +6,9 @@ def user_directory_path(instance, filename):
   return f"user_{instance.user.id}/{filename}"
 
 class Profile(models.Model):
-  user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE)
-  description = models.TextField()
-  photo = models.ImageField('profile photo', upload_to = user_directory_path)
+  user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+  description = models.TextField(null=True)
+  photo = models.ImageField('profile photo', null=True, upload_to = user_directory_path)
 
 
   def __str__(self):

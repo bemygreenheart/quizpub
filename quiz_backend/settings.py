@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'quiz.apps.QuizConfig',
     # third party
-    'rest_framework'
+    'rest_framework',
+    'markdown',
 ]
 
 MIDDLEWARE = [
@@ -131,3 +132,14 @@ STATICFILES_DIRS =  [
     path.join(BASE_DIR, 'account/static'), 
     '/var/www/static/'
 ]
+
+# Media Settings
+MEDIA_ROOT = path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.BasicAuthentication',
+#         'rest_framework.authentication.SessionAuthentication',
+#     ]
+# }
