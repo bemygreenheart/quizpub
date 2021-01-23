@@ -47,12 +47,13 @@ class QuestionSerializer(serializers.ModelSerializer):
     instance.save()
     for option_data in options_data:
       option_data = dict(option_data)
-      if 'id' in option_data:
+      try:
         option = Option.objects.get(pk=int(option_data.get('id')))
         option.text = option_data.get('text', option.text)
         option.is_answer = option_data.get('is_answer', option.is_answer)
         option.save()
-      else:
+      except Exception as e:
+        option_data.pop('id')
         option = Option.objects.create(question=instance, **option_data)
 
     return instance
