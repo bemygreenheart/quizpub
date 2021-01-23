@@ -17,6 +17,13 @@ class OptionSerializer(serializers.ModelSerializer):
     instance.save()
     return instance
 
+  def to_internal_value(self, data):
+    ret = super().to_internal_value(data)
+    lookup_field_name = 'id'
+    if self.context['request'].method in ('PUT', 'PATCH'):
+      ret[lookup_field_name] = self.fields[lookup_field_name].get_value(data)
+    return ret
+
 class QuestionSerializer(serializers.ModelSerializer):
   options = OptionSerializer(many = True)
 
@@ -34,16 +41,20 @@ class QuestionSerializer(serializers.ModelSerializer):
 # Each question is updated individually to minimize network traffic
   def update(self, instance, validated_data):
     options_data = validated_data.pop('options')
-    instance = validated_data.get("text", instance.text)
+    instance.text = validated_data.get("text", instance.text)
     instance.has_multiple_answers = validated_data.get('has_multiple_answers', instance.has_multiple_answers)
     instance.image = validated_data.get('image', instance.image)
-    for option_data in options_data:
-      option = get_object_or_404(Option, pk=option.id)
-      option.text = option_data.get('text', option.text)
-      option.is_answer = option_data.get('is_answer', option.is_answer)
-      option.save()
-
     instance.save()
+    for option_data in options_data:
+      option_data = dict(option_data)
+      if 'id' in option_data:
+        option = Option.objects.get(pk=int(option_data.get('id')))
+        option.text = option_data.get('text', option.text)
+        option.is_answer = option_data.get('is_answer', option.is_answer)
+        option.save()
+      else:
+        option = Option.objects.create(question=instance, **option_data)
+
     return instance
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -89,3 +100,4 @@ class QuizSerializer(serializers.ModelSerializer):
     instance.publish_date = validated_data.get('publish_date', instance.publish_date)
     instance.image = validated_data.get('image', instance.image)
     return instance
+
