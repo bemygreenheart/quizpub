@@ -16,7 +16,7 @@ class Quiz(models.Model):
   image = models.ImageField(null=True, upload_to=quiz_image_path)
   created_at = models.DateTimeField("created time",auto_now_add=True)
   is_published = models.BooleanField( default=True)
-  publish_date = models.DateTimeField()
+  publish_date = models.DateTimeField(null=True)
   comments = models.ManyToManyField(AUTH_USER_MODEL, through="Comment", related_name='my_comments')
   favourites = models.ManyToManyField(AUTH_USER_MODEL, related_name="my_favourites")
   categories = models.ManyToManyField(Category, related_name="quizes")
