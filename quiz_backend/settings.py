@@ -26,7 +26,7 @@ SECRET_KEY = 'l&b2wuvvq%y=(7vq3jkz)ojo)@%se-d_j&tg7(4sotnz!l=4h4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -62,7 +62,7 @@ ROOT_URLCONF = 'quiz_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [path.join(BASE_DIR, 'quizpub-client/build'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,18 +128,18 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = path.join(BASE_DIR, 'static')
 
+# React static files to be served
 STATICFILES_DIRS =  [
-    path.join(BASE_DIR, 'account/static'), 
-    '/var/www/static/'
+    path.join(BASE_DIR, 'quizpub-client/build/static'),
 ]
 
 # Media Settings
 MEDIA_ROOT = path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework.authentication.BasicAuthentication',
-#         'rest_framework.authentication.SessionAuthentication',
-#     ]
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
